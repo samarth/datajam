@@ -1,6 +1,6 @@
 from app import app
 
-from flask import jsonify,  render_template
+from flask import jsonify,  render_template , request
 
 
 from elasticsearch import Elasticsearch
@@ -13,8 +13,8 @@ def index():
     return render_template('dashboard/index.html')
 
 # Supposed to be open only for ajax calls ....
-@app.route('/listing/<username>')
-def get_user_track_listing (username):
+@app.route('/listing/')
+def get_user_track_listing ():
     '''
     This username goes to ES  ...
     Can have time based queries later.
@@ -22,28 +22,46 @@ def get_user_track_listing (username):
 
     response = {}
 
+    username =  request.args.get("username")
+
     if not username:
         response["error"] = "Make an effort to pass the username"
         return jsonify(response)
 
 
+    es_dsl = {
+        "query": {
+            "filtered": {
+                "filter": {
+                    "bool": {
+                        "must": [{"term": {"user": username}}],
+                    }
+                }
+            }
+        },
+        # Setting this to a very high value for now ...
+        "size" : 1000000
+    }
+
+    fromdate = request.args.get("fromdate")
+    todate   = request.args.get("todate")
+
+    if (fromdate and todate) :
+        es_dsl["query"]["filtered"]["filter"]["bool"]["must"].append(
+            {
+                "range" : {
+                    "date" : {
+                        "gte" : fromdate,
+                        "lte" : todate,
+                        "format": "dd/mm/yyyy"
+                    }
+                }
+            }
+        )
 
     es_response = client.search(
         index = "lastfm",
-        body={
-            "query": {
-                "filtered": {
-                    "filter": {
-                        "bool": {
-                            "must": [{"term": {"user": username}}],
-                        }
-                    }
-                }
-            },
-            # Setting this to a very high value for now ...
-            "size" : 1000000
-
-        }
+        body=es_dsl
     )
 
     user_data = []

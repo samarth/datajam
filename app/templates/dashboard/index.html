@@ -7,14 +7,48 @@
     <link rel="stylesheet" type="text/css" href="css/dashboard.css">
 {% endblock %}
     {% block content %}
-    <div class="col-xs-2">
-      <form class="form-search" id="query-listing">
-	<input id="username" type="text" class="input-medium search-query form-control">
-	<br/>
-	<button  type="submit" class="btn btn-primary">Search</button>
-      </form>
+
+
+    <div class="row">
+      <div class="col-md-2 col-md-offset-2">
+    	<div class="form-group">
+    	  <input id="username" type="text" placeholder="Lastfm Username" class="input-medium search-query form-control">
+    	</div>
+      </div>
+
+      <div class="col-md-2">
+    	<div class="form-group">
+    	  <div class="input-group date" id="fromdatectrl">
+            <input type="text" placeholder="From" class="form-control" id="fromdate" />
+            <span class="input-group-addon">
+              <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+    	  </div>
+    	</div>
+      </div>
+
+
+      <div class="col-md-2">
+    	<div class="form-group">
+    	  <div class="input-group date" id="todatectrl">
+            <input type="text" placeholder="Till" class="form-control" id="todate"/>
+            <span class="input-group-addon">
+              <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+    	  </div>
+    	</div>
+      </div>
+
+      <div class="col-md-2">
+    	<div class = "form-group">
+    	  <button  type="submit" class="btn btn-primary" onclick="getUserData()">Search</button>
+    	</div>
+      </div>
+
     </div>
+
     <div id="dashboard">
     </div>
+
   <script src="js/dashboard.js" type="text/javascript" ></script>
 {% endblock %}

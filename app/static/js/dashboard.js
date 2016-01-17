@@ -65,13 +65,30 @@ function _load(lastfmData) {
 
 }
 
-function getUserData (username) {
+function getUserData () {
+    $("#dashboard").empty();
 
-    d3.json("/listing/" + username , function (error, response) {
+    var username = $("#username").val();
+    var fromdate = $("#fromdate").val();
+    var todate   = $("#todate").val();
+
+
+    var queryParams = "?username=" + username;
+
+
+    if (fromdate) {
+	queryParams += "&fromdate=" + fromdate;
+    }
+
+    if (todate) {
+	queryParams += "&todate=" + todate;
+    }
+
+    d3.json("/listing" + queryParams , function (error, response) {
             // Handle error gracefully , by throwing it in the face at the very least ..
 
             if (error) {
-                alert("It didn't work " + (error.message || response.body));
+                alert("It didn't work " + (error.message || response.error || response.data));
             }
 
             _load(response.data);
@@ -79,9 +96,24 @@ function getUserData (username) {
 }
 
 
-$('#query-listing').on('submit', function(e){
-    $("#dashboard").empty();
-    e.preventDefault();
-    var username = $("#username").val();
-    getUserData(username);
-});
+/*
+ Initialize date time controls on the html ...
+ */
+(function () {
+    $('#fromdatectrl').datetimepicker({
+	format: 'DD/MM/YYYY'
+    });
+
+    $('#todatectrl').datetimepicker({
+	format: 'DD/MM/YYYY',
+        useCurrent: false //Important! See issue #1075
+    });
+
+    $("#fromdatectrl").on("dp.change", function (e) {
+        $('#todatectrl').data("DateTimePicker").minDate(e.date);
+    });
+
+    $("#todatectrl").on("dp.change", function (e) {
+        $('#fromdatectrl').data("DateTimePicker").maxDate(e.date);
+    });
+}());

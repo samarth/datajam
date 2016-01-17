@@ -2,10 +2,28 @@
 <html>
   <head>
     {% block head %}
+
+    <!-- Bootsrap CSS -->
     <link rel="stylesheet" href="css/bootstrap.min.css">
-    <script type="text/javascript" src="js/jquery-1.12.0.min.js"></script>
+
+    <!-- Bootstrap Date Picker CSS -->
+    <link rel="stylesheet" href="bower_components/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" />
+
+
+    <!-- Jquery -->
+
+    <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+
+    <!-- Boostrap JS -->
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="js/d3.min.js"></script>
+
+    <!-- D3  -->
+    <script type="text/javascript" src="bower_components/d3/d3.min.js"></script>
+
+    <!-- Bootstrap Date Picker JS -->
+    <script type="text/javascript" src="bower_components/moment/min/moment.min.js"></script>
+    <script type="text/javascript" src="bower_components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+
     <title>{% block title %}{% endblock %} - My Webpage</title>
     {% endblock %}
   </head>
