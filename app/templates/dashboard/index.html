@@ -1,10 +1,20 @@
-<!DOCTYPE html>
-<html>
-  <head>
+{% extends "base.html" %}
+
+{% block title %}Dashboard Home{% endblock %}
+
+{% block head %}
+    {{ super() }}
     <link rel="stylesheet" type="text/css" href="css/dashboard.css">
-    <script src="js/d3.min.js"  type="text/javascript"></script>
-  </head>
-  <body>
-    <script src="js/dashboard.js" type="text/javascript" ></script>
-  </body>
-</html>
+{% endblock %}
+    {% block content %}
+    <div class="col-xs-2">
+      <form class="form-search" id="query-listing">
+	<input id="username" type="text" class="input-medium search-query form-control">
+	<br/>
+	<button  type="submit" class="btn btn-primary">Search</button>
+      </form>
+    </div>
+    <div id="dashboard">
+    </div>
+  <script src="js/dashboard.js" type="text/javascript" ></script>
+{% endblock %}
