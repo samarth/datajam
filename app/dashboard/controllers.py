@@ -15,10 +15,6 @@ def index():
 # Supposed to be open only for ajax calls ....
 @app.route('/listing/')
 def get_user_track_listing ():
-    '''
-    This username goes to ES  ...
-    Can have time based queries later.
-    '''
 
     response = {}
 
@@ -71,4 +67,78 @@ def get_user_track_listing ():
 
 
     response["data"] = user_data
+    return jsonify(response)
+
+
+
+@app.route('/artists/top')
+def get_top_artists():
+
+
+    response = {}
+
+    username =  request.args.get("username")
+
+    if not username:
+        response["error"] = "Make an effort to pass the username"
+        return jsonify(response)
+
+
+    es_dsl = {
+        "query": {
+            "filtered": {
+                "filter": {
+                    "bool": {
+                        "must": [{"term": {"user": username}}],
+                    }
+                }
+            }
+        },
+        # Only supposed to fetch aggregations anyway
+        "size" : 0,
+        "aggs" : {
+            "top_artists" : {
+                "terms" : {
+                    "field" : "artist.text",
+                    "size"   : 10
+                }
+            }
+        }
+    }
+
+
+
+    fromdate = request.args.get("fromdate")
+    todate   = request.args.get("todate")
+
+
+    if (fromdate and todate) :
+        es_dsl["query"]["filtered"]["filter"]["bool"]["must"].append(
+            {
+                "range" : {
+                    "date" : {
+                        "gte" : fromdate,
+                        "lte" : todate,
+                        "format": "dd/mm/yyyy"
+                    }
+                }
+            }
+        )
+
+    print es_dsl
+
+    es_response = client.search(
+        index = "lastfm",
+        body=es_dsl
+    )
+
+
+    user_data = []
+
+
+    user_data = es_response.get("aggregations", {}).get("top_artists", {}).get("buckets", [])
+
+
+    response["data"] = user_data
+
     return jsonify(response)
