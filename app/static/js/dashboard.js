@@ -6,7 +6,7 @@ function _load(lastfmData) {
 
 
     var values = lastfmData.map(function (d) {
-        return new Date(d.date).getHours();
+        return new Date(d.date).getUTCHours();
     });
 
     // A formatter for counts.
