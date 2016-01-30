@@ -125,7 +125,76 @@ def get_top_artists():
             }
         )
 
-    print es_dsl
+    es_response = client.search(
+        index = "lastfm",
+        body=es_dsl
+    )
+
+
+    user_data = []
+
+
+    user_data = es_response.get("aggregations", {}).get("top_artists", {}).get("buckets", [])
+
+
+    response["data"] = user_data
+
+    return jsonify(response)
+
+
+@app.route('/artists/time')
+def get_artist_time():
+
+    response = {}
+
+    username =  request.args.get("username")
+
+    if not username:
+        response["error"] = "Make an effort to pass the username"
+        return jsonify(response)
+
+
+    es_dsl = {
+        "query": {
+            "filtered": {
+                "filter": {
+                    "bool": {
+                        "must": [{"term": {"user": username}}],
+                    }
+                }
+            }
+        },
+        # Only supposed to fetch aggregations anyway
+        "size" : 0,
+        "aggs" : {
+            "top_times" : {
+                "date_histogram" : {
+                    "field" : "date",
+                    "interval" : "hour"
+                }
+            }
+        }
+    }
+
+
+
+    fromdate = request.args.get("fromdate")
+    todate   = request.args.get("todate")
+
+
+    if (fromdate and todate) :
+        es_dsl["query"]["filtered"]["filter"]["bool"]["must"].append(
+            {
+                "range" : {
+                    "date" : {
+                        "gte" : fromdate,
+                        "lte" : todate,
+                        "format": "dd/mm/yyyy"
+                    }
+                }
+            }
+        )
+
 
     es_response = client.search(
         index = "lastfm",
