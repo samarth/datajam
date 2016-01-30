@@ -20,18 +20,25 @@ function _load(lastfmData) {
 
     // Generate a histogram using twenty four uniformly-spaced bins.
     var data = d3.layout.histogram()
-            .bins(x.ticks(24))
-    (values);
+                 .bins(x.ticks(24))
+               (values);
+
+
+    var totalDataPoints = lastfmData.length;
+
+    var hourlyProbabilities = [];
+
+    data.forEach(function (array , idx) {
+        array.probability = array.length / totalDataPoints;
+    });
 
     var y = d3.scale.linear()
             .domain([0, d3.max(data, function(d) { return d.y; })])
             .range([height, 0]);
 
-
     var xAxis = d3.svg.axis()
             .scale(x)
             .orient("bottom");
-
 
     var svg = d3.select("#dashboard").append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -39,6 +46,15 @@ function _load(lastfmData) {
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+
+    var tip = d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html(function(d) {
+                return "<strong>P(x):</strong> <span style='color:red'>" + d.probability + "</span>";
+            });
+
+    svg.call(tip);
 
     var bar = svg.selectAll(".bar")
             .data(data)
@@ -49,7 +65,10 @@ function _load(lastfmData) {
     bar.append("rect")
         .attr("x", 1)
         .attr("width", x(data[0].dx) - 1)
-        .attr("height", function(d) { return height - y(d.y); });
+        .attr("height", function(d) { return height - y(d.y); })
+        .on('mouseover', tip.show)
+        .on('mouseout', tip.hide);
+
 
     bar.append("text")
         .attr("dy", ".75em")
@@ -57,6 +76,7 @@ function _load(lastfmData) {
         .attr("x", x(data[0].dx) / 2)
         .attr("text-anchor", "middle")
         .text(function(d) { return formatCount(d.y); });
+
 
     svg.append("g")
         .attr("class", "x axis")
@@ -77,11 +97,11 @@ function getUserData () {
 
 
     if (fromdate) {
-	queryParams += "&fromdate=" + fromdate;
+        queryParams += "&fromdate=" + fromdate;
     }
 
     if (todate) {
-	queryParams += "&todate=" + todate;
+        queryParams += "&todate=" + todate;
     }
 
     d3.json("/listing" + queryParams , function (error, response) {
@@ -101,11 +121,11 @@ function getUserData () {
  */
 (function () {
     $('#fromdatectrl').datetimepicker({
-	format: 'DD/MM/YYYY'
+        format: 'DD/MM/YYYY'
     });
 
     $('#todatectrl').datetimepicker({
-	format: 'DD/MM/YYYY',
+        format: 'DD/MM/YYYY',
         useCurrent: false //Important! See issue #1075
     });
 
