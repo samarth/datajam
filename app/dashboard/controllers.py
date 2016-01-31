@@ -2,7 +2,7 @@ from app import app
 
 from flask import jsonify,  render_template , request
 
-
+from dateutil.parser import parse
 from elasticsearch import Elasticsearch
 
 client = Elasticsearch()
@@ -62,6 +62,8 @@ def get_user_track_listing ():
             }
         )
 
+
+
     es_response = client.search(
         index = "lastfm",
         body=es_dsl
@@ -106,7 +108,7 @@ def get_top_artists():
         "aggs" : {
             "top_artists" : {
                 "terms" : {
-                    "field" : "artist.text",
+                    "field" : "artist.text.raw",
                     "size"   : 10
                 }
             }
@@ -140,9 +142,7 @@ def get_top_artists():
 
     user_data = []
 
-
     user_data = es_response.get("aggregations", {}).get("top_artists", {}).get("buckets", [])
-
 
     response["data"] = user_data
 
@@ -151,6 +151,14 @@ def get_top_artists():
 
 @app.route('/artists/time')
 def get_artist_time():
+    '''
+    The intent of this api is to give time range aggregations
+    on the artist name ...
+
+    Useful for fetching what artist was I majorly listening to
+    at that hour of the day ....
+
+    '''
 
     response = {}
 
@@ -174,15 +182,22 @@ def get_artist_time():
         # Only supposed to fetch aggregations anyway
         "size" : 0,
         "aggs" : {
-            "top_times" : {
+            "per_hour" : {
                 "date_histogram" : {
-                    "field" : "date",
-                    "interval" : "hour"
+                    "field"    : "date",
+                    "interval" : "hour",
+                    "format"   : "YYYY-MM-dd HH:mm:ss"
+                },
+                "aggs" : {
+                    "top_artists" : {
+                        "terms" : {
+                            "field" : "artist.text.raw"
+                        }
+                    }
                 }
             }
         }
     }
-
 
 
     fromdate = request.args.get("fromdate")
@@ -208,12 +223,31 @@ def get_artist_time():
         body=es_dsl
     )
 
+    # A dictionary clubbing all artists
+    # per hour
 
-    user_data = []
+
+    user_data = {}
+
+    top_artists_per_hour = es_response.get("aggregations", {}).get("per_hour", {}).get("buckets", [])
+
+    for per_hour in top_artists_per_hour:
+        # Identify the hour first from the per_hour bucket
+        hour = parse(per_hour["key_as_string"]).hour
 
 
-    user_data = es_response.get("aggregations", {}).get("top_artists", {}).get("buckets", [])
+        if  not (hour in user_data) :
+            user_data[hour] = {}
 
+        for artist in per_hour["top_artists"]["buckets"] :
+
+            artist_count    = artist["doc_count"]
+            artist_name     = artist["key"]
+
+            if not (artist_name in user_data[hour]) :
+                user_data[hour][artist_name] = artist_count
+            else :
+                user_data[hour][artist_name] += artist_count
 
     response["data"] = user_data
 

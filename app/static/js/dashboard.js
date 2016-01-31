@@ -20,8 +20,7 @@ function _load(lastfmData) {
 
     // Generate a histogram using twenty four uniformly-spaced bins.
     var data = d3.layout.histogram()
-                 .bins(x.ticks(24))
-               (values);
+                 .bins(x.ticks(24))(values);
 
 
     var totalDataPoints = lastfmData.length;
