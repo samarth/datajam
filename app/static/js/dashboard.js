@@ -88,10 +88,10 @@ function _load(lastfmData) {
 function getUserData () {
     $("#dashboard").empty();
 
-    var username = $("#username").val();
-    var fromdate = $("#fromdate").val();
-    var todate   = $("#todate").val();
-
+    var username    = $("#username").val();
+    var fromdate    = $("#fromdate").val();
+    var todate      = $("#todate").val();
+    var artistName  = $("#artistName").val();
 
     var queryParams = "?username=" + username;
 
@@ -104,15 +104,20 @@ function getUserData () {
         queryParams += "&todate=" + todate;
     }
 
+    if (artistName) {
+        queryParams += "&artist=" + artistName;
+    }
+
     d3.json("/listing" + queryParams , function (error, response) {
             // Handle error gracefully , by throwing it in the face at the very least ..
 
-            if (error) {
-                alert("It didn't work " + (error.message || response.error || response.data));
-            }
+        if (error) {
+            alert("It didn't work " + (error.responseText));
+        }
 
-            _load(response.data);
-        });
+
+        _load(response.data);
+    });
 }
 
 

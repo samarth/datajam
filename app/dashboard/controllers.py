@@ -16,9 +16,11 @@ def index():
 @app.route('/listing/')
 def get_user_track_listing ():
 
-    response = {}
+    response    = {}
 
-    username =  request.args.get("username")
+    username    =  request.args.get("username")
+
+    artist_name = request.args.get("artist")
 
     if not username:
         response["error"] = "Make an effort to pass the username"
@@ -38,6 +40,11 @@ def get_user_track_listing ():
         # Setting this to a very high value for now ...
         "size" : 1000000
     }
+
+
+
+    if (artist_name) :
+        es_dsl["query"]["filtered"]["query"] =  {"match" : { "artist.text" : artist_name}}
 
     fromdate = request.args.get("fromdate")
     todate   = request.args.get("todate")
