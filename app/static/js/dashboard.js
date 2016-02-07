@@ -90,6 +90,42 @@ function _load(d3Data) {
                 return "<strong>P(x):</strong> <span style='color:red'>" + d.probability + "</span>";
             });
 
+
+    function drawTable() {
+        // The hour of the bar that was hovered upon
+        var hour = arguments[1];
+        // The data that corresponds to this
+
+        var artistData = d3Data.hourAggregation.data[hour];
+
+        var table = d3.select('#aggTable');
+
+        var columns = ["Artist Name", "Artist Count"];
+
+        table.append('thead').append('tr')
+            .selectAll('th')
+            .data(columns).enter()
+            .append('th')
+            .html(function (header) {return header;});
+
+
+        var tr = table.selectAll('tr')
+                .data(artistData).enter()
+                .append('tr');
+
+        tr.append('td')
+            .html(function(artist) { return artist[0]; });
+
+        tr.append('td')
+            .html(function(artist) { return artist[1]; });
+
+    }
+
+
+    function clearTable() {
+        $("#aggTable").empty();
+    }
+
     svg.call(tip);
 
     var bar = svg.selectAll(".bar")
@@ -102,8 +138,8 @@ function _load(d3Data) {
         .attr("x", 1)
         .attr("width", x(data[0].dx) - 1)
         .attr("height", function(d) { return height - y(d.y); })
-        .on('mouseover', tip.show)
-        .on('mouseout', tip.hide);
+        .on('mouseover', drawTable)
+        .on('mouseout', clearTable);
 
 
     bar.append("text")
