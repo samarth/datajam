@@ -5,6 +5,9 @@ from flask import jsonify,  render_template , request
 from dateutil.parser import parse
 from elasticsearch import Elasticsearch
 
+from collections import OrderedDict
+import operator
+
 client = Elasticsearch()
 
 @app.route('/')
@@ -164,6 +167,18 @@ def get_artist_time():
 
     username =  request.args.get("username")
 
+
+    # Lets add a minimum doc count too
+    min_doc_count = int (request.args.get("min_doc_count", 0)) or 1
+
+    # Support limits , get the top limit artists per hour .
+    limit = int(request.args.get("limit", 0)) or 10
+
+    # Support the direction bottom limit or top limit
+    order_desc = True
+    if (request.args.get("order") == "asc") :
+        order_desc = False
+
     if not username:
         response["error"] = "Make an effort to pass the username"
         return jsonify(response)
@@ -217,7 +232,6 @@ def get_artist_time():
             }
         )
 
-
     es_response = client.search(
         index = "lastfm",
         body=es_dsl
@@ -225,7 +239,6 @@ def get_artist_time():
 
     # A dictionary clubbing all artists
     # per hour
-
 
     user_data = {}
 
@@ -248,6 +261,21 @@ def get_artist_time():
                 user_data[hour][artist_name] = artist_count
             else :
                 user_data[hour][artist_name] += artist_count
+
+    # Now that the dictionary is made , arrange each hour with its top artists :
+    # This is according to the limit passed.
+
+    for hour in user_data :
+
+        user_data[hour] = sorted(user_data[hour].items(), key=operator.itemgetter(1))
+        # x[0] -> artist name , x[2] -> artist count
+        user_data[hour] = [ x  for x in user_data[hour] if x[1] > min_doc_count ]
+
+        if (order_desc):
+            user_data[hour].reverse()
+
+        # not exactly a json , the clients going to handle this then.
+        user_data[hour] = user_data[hour][:limit]
 
     response["data"] = user_data
 
