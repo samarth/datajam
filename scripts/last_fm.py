@@ -118,7 +118,7 @@ def insert_recent_tracks_data (recent_tracks_data):
 
 def init():
 
-    last_fm_requestor = LastFmRequestor(api_key = "4d20075c395bd6dc0a4f7f92cdf178dc" , user = "samarthmed" )
+    last_fm_requestor = LastFmRequestor(api_key = "<YOUR_API_KEY>" , user = "<YOUR_LASTFM_USERNAME>" )
 
     tracks = last_fm_requestor.get_recent_tracks()
     total_pages = tracks["recenttracks"]["@attr"]["totalPages"]
