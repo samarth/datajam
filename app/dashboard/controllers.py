@@ -169,13 +169,14 @@ def get_artist_time():
 
 
     # Lets add a minimum doc count too
-    min_doc_count = int (request.args.get("min_doc_count", 0)) or 1
+    min_doc_count = int (request.args.get("minDocCount", 0)) or 1
 
     # Support limits , get the top limit artists per hour .
     limit = int(request.args.get("limit", 0)) or 10
 
     # Support the direction bottom limit or top limit
     order_desc = True
+
     if (request.args.get("order") == "asc") :
         order_desc = False
 
@@ -269,7 +270,7 @@ def get_artist_time():
 
         user_data[hour] = sorted(user_data[hour].items(), key=operator.itemgetter(1))
         # x[0] -> artist name , x[2] -> artist count
-        user_data[hour] = [ x  for x in user_data[hour] if x[1] > min_doc_count ]
+        user_data[hour] = [ x  for x in user_data[hour] if x[1] >= min_doc_count ]
 
         if (order_desc):
             user_data[hour].reverse()
