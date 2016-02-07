@@ -175,10 +175,12 @@ function getUserData () {
  */
 (function () {
     $('#fromdatectrl').datetimepicker({
+        defaultDate: "11/1/2011",
         format: 'DD/MM/YYYY'
     });
 
     $('#todatectrl').datetimepicker({
+        defaultDate: new Date(),
         format: 'DD/MM/YYYY',
         useCurrent: false //Important! See issue #1075
     });
