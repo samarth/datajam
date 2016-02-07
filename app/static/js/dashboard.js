@@ -213,7 +213,7 @@ function getUserData () {
 
     var minDocCount = $("#minDocCount").val();
     var order       = $("input[name=optradio]:checked").val();
-
+    var limit       = $("#limit").val();
 
     var queryParams = "?username=" + username;
 
@@ -238,6 +238,10 @@ function getUserData () {
         queryParams += "&order=" + order;
     }
 
+
+    if (limit) {
+        queryParams += "&limit=" + limit;
+    }
 
    /*
      May want to expose : min doc count and order and limits later
