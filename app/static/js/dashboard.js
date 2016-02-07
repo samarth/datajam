@@ -47,6 +47,9 @@ function _load(d3Data) {
     // A formatter for counts.
     var formatCount = d3.format(",.0f");
 
+    var barClicked = false;
+    var selectedBar = null;
+    var barId       = 0;
 
     var x = d3.scale.linear()
             .domain([0, 24])
@@ -92,7 +95,14 @@ function _load(d3Data) {
 
 
     function drawTable() {
+
+        //Don't draw a table if any bar is clicked
+        if (barClicked) {
+            return;
+        }
+
         // The hour of the bar that was hovered upon
+
         var hour = arguments[1];
         // The data that corresponds to this
 
@@ -121,8 +131,39 @@ function _load(d3Data) {
 
     }
 
+    function toggleState () {
+        // Select the bar to change the color
+
+        var currentColor;
+        var clickedBarId = d3.select(this).attr('id');
+
+        if (selectedBar && (clickedBarId !== selectedBar)) {
+            // Don't do anything,  let the user switch off the highlighted
+            // bar first.
+            console.log("#### selected bar not equal clickedBarId");
+            return ;
+        }
+
+        if (barClicked) {
+            currentColor = "steelblue";
+            selectedBar = null;
+        } else {
+            currentColor = "red";
+            selectedBar = clickedBarId;
+        }
+
+        barClicked = !barClicked;
+
+        d3.select(this).style("fill", currentColor);
+        return;
+    }
+
 
     function clearTable() {
+        if (barClicked) {
+            // Don't empty the table if any bar is clicked
+            return;
+        }
         $("#aggTable").empty();
     }
 
@@ -137,9 +178,11 @@ function _load(d3Data) {
     bar.append("rect")
         .attr("x", 1)
         .attr("width", x(data[0].dx) - 1)
+        .attr("id", function(d) { return barId++;})
         .attr("height", function(d) { return height - y(d.y); })
         .on('mouseover', drawTable)
-        .on('mouseout', clearTable);
+        .on('mouseout', clearTable)
+        .on('click', toggleState);
 
 
     bar.append("text")
