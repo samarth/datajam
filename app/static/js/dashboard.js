@@ -33,7 +33,7 @@ function _getTimeAggregation (queryParams) {
 }
 
 
-function _load(d3Data) {
+function _load(d3Data, queryParams) {
 
     var margin = {top: 20, right: 20, bottom: 30, left: 40},
         width = 960 - margin.left - margin.right,
@@ -118,13 +118,14 @@ function _load(d3Data) {
             .append('th')
             .html(function (header) {return header;});
 
+        var serverHost = "http://datajam.com/listing";
 
         var tr = table.selectAll('tr')
                 .data(artistData).enter()
                 .append('tr');
 
         tr.append('td')
-            .html(function(artist) { return artist[0]; });
+            .html(function(artist) { return "<a target=\"blank\" href="+ serverHost + queryParams + "&artist=" + artist[0] + ">" + artist[0] +"</a>"; });
 
         tr.append('td')
             .html(function(artist) { return artist[1]; });
@@ -260,7 +261,8 @@ function getUserData () {
         })
         .then(function(hourAggregation) {
             d3Data.hourAggregation = hourAggregation;
-            _load(d3Data);
+            // queryParams are used in listing incase a user clicks on an artist
+            _load(d3Data, queryParams);
         })
         .fail(function(error) {
             alert (error);
