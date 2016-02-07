@@ -1,11 +1,46 @@
-function _load(lastfmData) {
+function _getArtistListing (queryParams) {
+    var deferred = Q.defer();
+    d3.json("/listing" + queryParams , function (error, response) {
+        // Handle error gracefully , by throwing it in the face at the very least ..
+
+        if (error) {
+            deferred.reject(error);
+        }
+
+        deferred.resolve(response);
+    });
+
+    return deferred.promise;
+}
+
+
+
+function _getTimeAggregation (queryParams) {
+
+    var deferred = Q.defer();
+
+    d3.json("/artists/time" + queryParams , function (error, response) {
+        // Handle error gracefully , by throwing it in the face at the very least ..
+
+        if (error) {
+            deferred.reject(error);
+        }
+
+        deferred.resolve(response);
+    });
+
+    return deferred.promise;
+}
+
+
+function _load(d3Data) {
 
     var margin = {top: 20, right: 20, bottom: 30, left: 40},
         width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
 
-    var values = lastfmData.map(function (d) {
+    var values = d3Data.artistListing.data.map(function (d) {
         return new Date(d.date).getUTCHours();
     });
 
@@ -17,19 +52,21 @@ function _load(lastfmData) {
             .domain([0, 24])
             .range([0, width]);
 
-
     // Generate a histogram using twenty four uniformly-spaced bins.
     var data = d3.layout.histogram()
-                 .bins(x.ticks(24))(values);
+            .bins(x.ticks(24))(values);
 
-
-    var totalDataPoints = lastfmData.length;
+    // Samarth : 7th Feb
+    // Giving probabilities for hourly metric was a stupid idea
+    // the length of the historgrams already denote that, but atleast
+    // the tool tip worked.
 
     var hourlyProbabilities = [];
 
     data.forEach(function (array , idx) {
-        array.probability = array.length / totalDataPoints;
+        array.probability = array.length / d3Data.artistListing.data.length ;
     });
+
 
     var y = d3.scale.linear()
             .domain([0, d3.max(data, function(d) { return d.y; })])
@@ -85,6 +122,7 @@ function _load(lastfmData) {
 }
 
 function getUserData () {
+
     $("#dashboard").empty();
 
     var username    = $("#username").val();
@@ -107,16 +145,28 @@ function getUserData () {
         queryParams += "&artist=" + artistName;
     }
 
-    d3.json("/listing" + queryParams , function (error, response) {
-            // Handle error gracefully , by throwing it in the face at the very least ..
+   /*
+     May want to expose : min doc count and order and limits later
+     Really cool metric .
+   */
 
-        if (error) {
-            alert("It didn't work " + (error.responseText));
-        }
+    // Lets make this promise dependent ,
+    // we can query both time aggregations to
+    // draw the tool tips too .
 
-
-        _load(response.data);
-    });
+    var d3Data = {};
+    _getArtistListing(queryParams)
+        .then(function (artistListing) {
+            d3Data.artistListing = artistListing;
+            return _getTimeAggregation(queryParams);
+        })
+        .then(function(hourAggregation) {
+            d3Data.hourAggregation = hourAggregation;
+            _load(d3Data);
+        })
+        .fail(function(error) {
+            alert (error);
+        });
 }
 
 
