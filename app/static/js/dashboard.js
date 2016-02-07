@@ -166,6 +166,12 @@ function getUserData () {
     var todate      = $("#todate").val();
     var artistName  = $("#artistName").val();
 
+    //Options more specific to aggs ...
+
+    var minDocCount = $("#minDocCount").val();
+    var order       = $("input[name=optradio]:checked").val();
+
+
     var queryParams = "?username=" + username;
 
 
@@ -180,6 +186,15 @@ function getUserData () {
     if (artistName) {
         queryParams += "&artist=" + artistName;
     }
+
+    if (minDocCount) {
+        queryParams += "&minDocCount=" + minDocCount;
+    }
+
+    if (order) {
+        queryParams += "&order=" + order;
+    }
+
 
    /*
      May want to expose : min doc count and order and limits later
