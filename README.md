@@ -13,7 +13,7 @@ The prerequisite for anyone to use this repo (right now) is to have elasticsearc
 
 - Use nginx to serve all your static file needs , config will be inside the conf folder ...
 
-- Create an elasticsearch index with the specified mapping in the conf/elasticsearch.conf .
+- [Create an elasticsearch index](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html) called lastfm with the specified mapping in the conf/elasticsearch.conf .
 
 
 The default page of the server will provide a an artist search and a from and to date filters ..
